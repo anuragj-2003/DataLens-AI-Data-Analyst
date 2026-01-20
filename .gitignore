@@ -1,0 +1,30 @@
+# General
+.DS_Store
+.env
+.env.local
+.env.*.local
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/dist-ssr/
+frontend/*.local
+frontend/.vscode/
+
+# Backend (Node.js)
+backend/node_modules/
+backend/uploads/
+backend/coverage/
+backend/logs/
+backend/*.log
+backend/package-lock.json
+
+# Legacy / Python (Optional to keep)
+__pycache__/
+*.pyc
+.venv/
+
+# Database
+*.db
+backend/data/
+
