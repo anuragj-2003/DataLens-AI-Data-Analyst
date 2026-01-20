@@ -17,6 +17,21 @@ const SMTP_PASSWORD = process.env.SMTP_PASSWORD || "";
 // DESCRIPTION: Sends a verification OTP to the user's email.
 // INPUT: toEmail (String), otp (String)
 // OUTPUT: Boolean (True if successful)
+// Initialize transporter globally to reuse connection pool
+const transporter = nodemailer.createTransport({
+    host: SMTP_SERVER,
+    port: SMTP_PORT,
+    secure: false, // true for 465, false for other ports
+    auth: {
+        user: SMTP_USER,
+        pass: SMTP_PASSWORD,
+    },
+});
+
+// FUNCTION: sendOtpEmail
+// DESCRIPTION: Sends a verification OTP to the user's email.
+// INPUT: toEmail (String), otp (String)
+// OUTPUT: Boolean (True if successful)
 const sendOtpEmail = async (toEmail, otp) => {
     // MOCK MODE:
     // If no SMTP credentials are in .env, just log the OTP to console.
@@ -27,23 +42,12 @@ const sendOtpEmail = async (toEmail, otp) => {
     }
 
     try {
-        let transporter = nodemailer.createTransport({
-            host: SMTP_SERVER,
-            port: SMTP_PORT,
-            secure: false, // true for 465, false for other ports
-            auth: {
-                user: SMTP_USER,
-                pass: SMTP_PASSWORD,
-            },
-        });
-
         let info = await transporter.sendMail({
             from: SMTP_USER,
             to: toEmail,
             subject: "Your Verification Code",
             text: `Your OTP is: ${otp}`,
         });
-
         return true;
     } catch (e) {
         console.error(`Failed to send email: ${e}`);

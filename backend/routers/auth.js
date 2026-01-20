@@ -96,7 +96,7 @@ router.post('/signup', async (req, res) => {
             { upsert: true, new: true }
         );
 
-        sendOtpEmail(email, otp);
+        await sendOtpEmail(email, otp);
         res.json({ email, full_name, is_verified: false });
 
     } catch (e) {
@@ -249,7 +249,7 @@ router.post('/forgot-password', async (req, res) => {
             { upsert: true, new: true }
         );
 
-        sendOtpEmail(email, otp);
+        await sendOtpEmail(email, otp);
         res.json({ message: "OTP sent" });
     } catch (e) {
         console.error("Forgot password error", e);
