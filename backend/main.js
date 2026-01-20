@@ -31,17 +31,23 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // ROUTER REGISTRATION
+// ROUTER REGISTRATION
 const authRouter = require('./routers/auth');
 const chatRouter = require('./routers/chat');
 const documentsRouter = require('./routers/documents');
 const settingsRouter = require('./routers/settings');
 const feedbackRouter = require('./routers/feedback');
 
-app.use('/auth', authRouter);
-app.use('/chat', chatRouter);
-app.use('/documents', documentsRouter);
-app.use('/settings', settingsRouter);
-app.use('/feedback', feedbackRouter);
+const apiRouter = express.Router();
+apiRouter.use('/auth', authRouter);
+apiRouter.use('/chat', chatRouter);
+apiRouter.use('/documents', documentsRouter);
+apiRouter.use('/settings', settingsRouter);
+apiRouter.use('/feedback', feedbackRouter);
+
+// Mount the API router at both root (for local) and /api (for Vercel/prod)
+app.use('/', apiRouter);
+app.use('/api', apiRouter);
 
 // Health Check Endpoint
 app.get('/', (req, res) => {
