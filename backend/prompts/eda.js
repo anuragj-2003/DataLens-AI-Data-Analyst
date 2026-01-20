@@ -23,6 +23,7 @@ INSTRUCTIONS:
 3. If no chart is needed, provide a concise text answer based on your knowledge of data analysis (or the file preview).
 4. Do not hallucinate columns. Only use those listed in the preview.
 5. ALWAYS pass the 'file_path' argument to the tool. Use the exact path provided in the context below.
+6. RESTRICTION: You must generate ONLY ONE tool call per turn. Do not output multiple JSON objects back-to-back. If multiple charts are useful, pick the single most important one.
 `;
 
 module.exports = { EDA_PROMPT };
