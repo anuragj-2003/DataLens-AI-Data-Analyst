@@ -10,7 +10,7 @@ const generateChartTool = new DynamicStructuredTool({
         chart_type: z.enum(["bar", "line", "scatter", "pie", "histogram", "area"]).describe("The type of chart to generate"),
         x_column: z.string().describe("The column name for the X-axis"),
         series_columns: z.union([z.string(), z.array(z.string())]).nullish().transform(v => {
-            if (typeof v === 'string') return [v]; // Coerce string to array
+            if (typeof v === 'string') return v.trim() === "" ? [] : [v]; // Handle empty string -> empty array
             return v ?? [];
         }).describe("Array of column names for the Y-axis/Series. Leave empty for Histogram or generic Count."),
         title: z.string().describe("A descriptive title for the chart"),
