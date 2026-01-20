@@ -14,9 +14,13 @@ const { processUploadedFile } = require('../utils/fileUtils');
 const path = require('path');
 const fs = require('fs');
 
+const os = require('os');
+
 // SETUP: Storage Configuration
-// DESCRIPTION: Configures Multer to save files to the 'backend/uploads' folder.
-const uploadDir = path.join(__dirname, '../uploads');
+// DESCRIPTION: Configures Multer to save files to the system temp folder.
+// This is required for Vercel Serverless Functions (Read-only file system).
+const uploadDir = os.tmpdir();
+// Ensure it exists (usually does)
 if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir, { recursive: true });
 }
