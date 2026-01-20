@@ -19,8 +19,12 @@
             "dest": "/backend/main.js"
         },
         {
-            "src": "/(.*)",
+            "src": "/(.*\\..+)",
             "dest": "/frontend/$1"
+        },
+        {
+            "src": "/(.*)",
+            "dest": "/frontend/index.html"
         }
     ]
 }
