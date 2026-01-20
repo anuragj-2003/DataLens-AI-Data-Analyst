@@ -6,24 +6,37 @@ const generateChartTool = new DynamicStructuredTool({
     name: "generate_chart",
     description: "Generates a chart/graph from the CSV data. Use this tool when the user asks to visualize data.",
     schema: z.object({
-        file_path: z.string().describe("The absolute path to the CSV file to analyze"),
-        chart_type: z.enum(["bar", "line", "scatter", "pie", "histogram", "area"]).describe("The type of chart to generate"),
-        x_column: z.string().describe("The column name for the X-axis"),
-        series_columns: z.union([z.string(), z.array(z.string())]).nullish().transform(v => {
-            if (typeof v === 'string') return [v]; // Coerce string to array
-            return v ?? [];
-        }).describe("Array of column names for the Y-axis/Series. Leave empty for Histogram or generic Count."),
-        title: z.string().describe("A descriptive title for the chart"),
-        description: z.string().nullish().transform(v => v || "").describe("A brief explanation of what the chart shows")
+        // DEBUG MODE: Relaxed Schema to catch LLM output errors
+        file_path: z.string().optional().describe("The absolute path to the CSV file to analyze"),
+        chart_type: z.string().optional().describe("The type of chart to generate (bar, line, scatter, pie, histogram, area)"),
+        x_column: z.string().optional().describe("The column name for the X-axis"),
+        series_columns: z.any().optional().describe("Array of column names for the Y-axis/Series."),
+        title: z.string().optional().describe("A descriptive title for the chart"),
+        description: z.string().optional().describe("A brief explanation of what the chart shows")
     }),
-    func: async ({ file_path, chart_type, x_column, series_columns, title, description }) => {
+    func: async (input) => {
         try {
-            console.log(`[Tool: generate_chart] Request: ${chart_type} for ${x_column}`);
+            console.log(`[Tool: generate_chart] Raw Input:`, JSON.stringify(input));
+
+            // MANUAL VALIDATION / COERCION
+            let { file_path, chart_type, x_column, series_columns, title, description } = input;
+
+            if (!file_path || !chart_type || !x_column) {
+                return `Error: Missing required fields (file_path, chart_type, or x_column). Received Input: ${JSON.stringify(input)}`;
+            }
+
+            // Coerce series_columns
+            let finalSeries = [];
+            if (Array.isArray(series_columns)) {
+                finalSeries = series_columns;
+            } else if (typeof series_columns === 'string') {
+                finalSeries = [series_columns];
+            }
 
             // Call the utility function logic
             let rawChartData = await getChartData(file_path, {
                 x_column,
-                series_columns,
+                series_columns: finalSeries,
                 chart_type
             });
 
@@ -31,36 +44,30 @@ const generateChartTool = new DynamicStructuredTool({
                 return JSON.stringify({ error: "No data generated. Check column names or filters." });
             }
 
-            // Smart Key Inference for Histogram/Count (Duplicating logic from chat.js for robustness inside tool)
-            let finalSeriesKeys = series_columns || [];
+            // Smart Key Inference for Histogram/Count
+            let finalSeriesKeys = finalSeries;
             if (finalSeriesKeys.length === 0 && rawChartData.length > 0) {
                 const sample = rawChartData[0];
                 if (sample['Count'] !== undefined) finalSeriesKeys = ['Count'];
                 else if (sample['Frequency'] !== undefined) finalSeriesKeys = ['Frequency'];
             }
 
-            // Return the full object structure so the AgentExecutor returns it in steps
+            // Return the full object structure
             const result = {
                 type: chart_type,
                 data: rawChartData,
                 xKey: x_column,
                 seriesKeys: finalSeriesKeys,
-                title: title,
-                description: description
+                title: title || "Chart",
+                description: description || ""
             };
 
-            // We return a string for the LLM to read. 
-            // We summarize data to avoid token limit overflow for the LLM, 
-            // BUT we need the FULL object for the frontend.
-            // PRO TIP: We can put the full object in a "hidden" field or just return the JSON.
-            // Given Groq holds 8k context, 150 rows is small (~2k tokens). 
-            // If data is huge, we should truncate for LLM but keep full for frontend.
-            // For now, let's return JSON.stringify(result).
             return JSON.stringify(result);
 
         } catch (error) {
             console.error("[Tool Error]", error);
-            return `Error generating chart: ${error.message}`;
+            // Return error to LLM so it can retry
+            return `System Error generating chart: ${error.message}`;
         }
     }
 });
