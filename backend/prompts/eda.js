@@ -22,6 +22,7 @@ INSTRUCTIONS:
    - For Counts (Bar Chart of frequency): Leave 'series_columns' empty or use ["Count"].
 3. If no chart is needed, provide a concise text answer based on your knowledge of data analysis (or the file preview).
 4. Do not hallucinate columns. Only use those listed in the preview.
+5. ALWAYS pass the 'file_path' argument to the tool. Use the exact path provided in the context below.
 `;
 
 module.exports = { EDA_PROMPT };
