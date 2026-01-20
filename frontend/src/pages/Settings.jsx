@@ -13,6 +13,27 @@ const Settings = () => {
     // Local state for account actions
     const [passwordData, setPasswordData] = useState({ current: '', new: '', confirm: '' });
     const [msg, setMsg] = useState({ type: '', text: '' });
+    const [localSystemPrompt, setLocalSystemPrompt] = useState(systemPrompt);
+
+    // Update local state when context changes (initial load)
+    React.useEffect(() => {
+        setLocalSystemPrompt(systemPrompt);
+    }, [systemPrompt]);
+
+    const showMessage = (type, text) => {
+        setMsg({ type, text });
+        setTimeout(() => setMsg({ type: '', text: '' }), 3000);
+    };
+
+    const handleSaveTheme = () => {
+        // Theme is already applied via Context, this just confirms action to user
+        showMessage('success', 'Theme preference saved successfully');
+    };
+
+    const handleSaveSystemPrompt = () => {
+        setSystemPrompt(localSystemPrompt);
+        showMessage('success', 'System prompt and behavior saved');
+    };
 
     const handlePasswordChange = async (e) => {
         e.preventDefault();
@@ -83,17 +104,27 @@ const Settings = () => {
                         </div>
                     </div>
 
-                    <div>
-                        <label className="block text-sm font-medium text-zinc-600 dark:text-zinc-400 mb-2">Theme</label>
-                        <select
-                            value={theme}
-                            onChange={(e) => setTheme(e.target.value)}
-                            className="w-full bg-gray-50 dark:bg-black border border-zinc-200 dark:border-zinc-800 rounded-lg p-3 text-zinc-900 dark:text-white focus:ring-2 focus:ring-pink-500 outline-none"
-                        >
-                            <option value="system">System Default</option>
-                            <option value="dark">Dark Mode</option>
-                            <option value="light">Light Mode</option>
-                        </select>
+                    <div className="space-y-4">
+                        <div>
+                            <label className="block text-sm font-medium text-zinc-600 dark:text-zinc-400 mb-2">Theme</label>
+                            <select
+                                value={theme}
+                                onChange={(e) => setTheme(e.target.value)}
+                                className="w-full bg-gray-50 dark:bg-black border border-zinc-200 dark:border-zinc-800 rounded-lg p-3 text-zinc-900 dark:text-white focus:ring-2 focus:ring-pink-500 outline-none"
+                            >
+                                <option value="system">System Default</option>
+                                <option value="dark">Dark Mode</option>
+                                <option value="light">Light Mode</option>
+                            </select>
+                        </div>
+                        <div className="flex justify-end">
+                            <button
+                                onClick={handleSaveTheme}
+                                className="flex items-center gap-2 px-4 py-2 bg-zinc-900 dark:bg-white text-white dark:text-black rounded-lg hover:opacity-90 transition-opacity text-sm font-medium"
+                            >
+                                <Save size={16} /> Save Theme
+                            </button>
+                        </div>
                     </div>
                 </section>
 
@@ -157,12 +188,19 @@ const Settings = () => {
                     <div className="space-y-4">
                         <label className="block text-sm font-medium text-zinc-600 dark:text-zinc-400">System Prompt</label>
                         <textarea
-                            value={systemPrompt}
-                            onChange={(e) => setSystemPrompt(e.target.value)}
+                            value={localSystemPrompt}
+                            onChange={(e) => setLocalSystemPrompt(e.target.value)}
                             className="w-full h-32 bg-gray-50 dark:bg-black border border-zinc-200 dark:border-zinc-800 rounded-lg p-3 text-zinc-900 dark:text-zinc-200 focus:ring-2 focus:ring-blue-500 outline-none resize-none"
                             placeholder="e.g., You are a strict coding assistant..."
                         />
-                        {/* Changes persist automatically via Context */}
+                        <div className="flex justify-end">
+                            <button
+                                onClick={handleSaveSystemPrompt}
+                                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+                            >
+                                <Save size={16} /> Save Settings
+                            </button>
+                        </div>
                     </div>
                 </section>
 
@@ -208,15 +246,15 @@ const Settings = () => {
                     </form>
                 </section>
 
-                {/* Danger Zone */}
-                <section className="border border-red-200 dark:border-red-900/30 bg-red-50 dark:bg-red-900/5 rounded-2xl p-6">
+                {/* Account & Data (Formerly Danger Zone) */}
+                <section className="bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-6 shadow-sm">
                     <div className="flex items-center gap-4 mb-6">
                         <div className="w-12 h-12 rounded-full bg-red-100 dark:bg-red-600/20 flex items-center justify-center text-red-600 dark:text-red-500">
                             <AlertTriangle size={24} />
                         </div>
                         <div>
-                            <h2 className="text-xl font-semibold text-red-600 dark:text-red-500">Danger Zone</h2>
-                            <p className="text-red-500/70 dark:text-red-400/60 text-sm">Irreversible actions</p>
+                            <h2 className="text-xl font-semibold">Account & Data</h2>
+                            <p className="text-zinc-500 dark:text-zinc-400 text-sm">Manage your data and account deletion</p>
                         </div>
                     </div>
 
