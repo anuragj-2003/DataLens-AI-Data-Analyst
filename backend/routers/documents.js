@@ -8,7 +8,7 @@
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
-const { verifyToken } = require('../routers/auth');
+const { verifyToken, optionalVerifyToken } = require('../routers/auth');
 const { vectorStore } = require('../state');
 const { processUploadedFile } = require('../utils/fileUtils');
 const path = require('path');
@@ -40,7 +40,7 @@ const upload = multer({ storage: storage });
 // INPUT: Multipart Form Data ('file')
 // OUTPUT: JSON { filename, status, file_path, chunks }
 // ==========================================================================
-router.post('/upload', verifyToken, upload.single('file'), async (req, res) => {
+router.post('/upload', optionalVerifyToken, upload.single('file'), async (req, res) => {
     try {
         const file = req.file;
         if (!file) {
@@ -54,11 +54,11 @@ router.post('/upload', verifyToken, upload.single('file'), async (req, res) => {
         // ------------------------------------------------------------------
         // Allowed: CSV, TXT, DOCX, DOC
         // Rejected: PDF, Excel, JSON, etc.
-        const allowedExtensions = ['csv', 'txt', 'docx', 'doc'];
+        const allowedExtensions = ['csv', 'txt', 'docx', 'doc', 'pdf'];
         if (!allowedExtensions.includes(ext)) {
             // Delete the uploaded file immediately if it's not allowed
             try { fs.unlinkSync(file.path); } catch (e) { }
-            return res.status(400).json({ detail: `Unsupported file type: ${ext}. Only CSV, TXT, and Word files are allowed.` });
+            return res.status(400).json({ detail: `Unsupported file type: ${ext}. Only CSV, PDF, TXT, and Word files are allowed.` });
         }
 
         // If CSV, it's for EDA.

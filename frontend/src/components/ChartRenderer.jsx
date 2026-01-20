@@ -161,8 +161,8 @@ const ChartRenderer = ({ chartConfig }) => {
                 </button>
             </div>
 
-            <div className="w-full flex-1 min-h-[300px]" style={{ height: 300 }}>
-                <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
+            <div className="w-full h-[300px] relative">
+                <ResponsiveContainer width="100%" height="100%">
                     {renderChart()}
                 </ResponsiveContainer>
             </div>
