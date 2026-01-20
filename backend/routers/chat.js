@@ -106,8 +106,31 @@ router.post('/', optionalVerifyToken, async (req, res) => {
         // ---------------------------------------------------------
         // STRATEGY 1: EDA AGENT (If File Uploaded)
         // ---------------------------------------------------------
+        const FileModel = require('../models/FileModel');
+        const fs = require('fs');
+        const os = require('os');
+        const path = require('path');
+
+        // ...
+
         if (file_path) {
             try {
+                // RESTORE FILE IF FROM DB (Vercel Fix)
+                if (file_path.startsWith('db://')) {
+                    const fileId = file_path.replace('db://', '');
+                    const fileDoc = await FileModel.findById(fileId);
+
+                    if (!fileDoc) {
+                        throw new Error("File expired or not found. Please upload again.");
+                    }
+
+                    // Write to local temp
+                    const tempDir = os.tmpdir();
+                    const restoredPath = path.join(tempDir, `${fileId}-${fileDoc.filename}`);
+                    fs.writeFileSync(restoredPath, fileDoc.content);
+                    file_path = restoredPath; // Update for analysis tools
+                }
+
                 // 1. Analyze File
                 const fileStats = await analyzeCsv(file_path);
 
