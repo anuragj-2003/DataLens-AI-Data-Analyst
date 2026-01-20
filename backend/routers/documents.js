@@ -65,14 +65,36 @@ router.post('/upload', optionalVerifyToken, upload.single('file'), async (req, r
             return res.status(400).json({ detail: `Unsupported file type: ${ext}. Only CSV, PDF, TXT, and Word files are allowed.` });
         }
 
+        const FileModel = require('../models/FileModel');
+
+        // ...
+
         // If CSV, it's for EDA.
         if (ext === 'csv') {
-            return res.json({
-                filename: file.originalname,
-                status: "stored_for_eda",
-                chunks: 0,
-                file_path: file.path
-            });
+            try {
+                // Read content to save to DB (Vercel Fix)
+                const content = fs.readFileSync(file.path, 'utf8');
+
+                const fileDoc = new FileModel({
+                    filename: file.originalname,
+                    content: content,
+                    mimeType: 'text/csv'
+                });
+                await fileDoc.save();
+
+                // Delete local temp file immediately as we have it in DB
+                fs.unlinkSync(file.path);
+
+                return res.json({
+                    filename: file.originalname,
+                    status: "stored_for_eda",
+                    chunks: 0,
+                    file_path: `db://${fileDoc._id}` // Special Protocol for Chat Router
+                });
+            } catch (err) {
+                console.error("DB Save Error", err);
+                return res.status(500).json({ detail: "Failed to persist file." });
+            }
         }
 
         // LOGIC: RAG Processing
