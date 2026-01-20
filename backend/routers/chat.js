@@ -184,11 +184,16 @@ router.post('/', optionalVerifyToken, async (req, res) => {
 
                 const history = await getHistory(conversation_id);
 
-                // 4. Execute Agent
-                const result = await agentExecutor.invoke({
-                    input: message,
-                    chat_history: history
-                });
+                // 4. Execute Agent with Timeout (9s for Vercel Hobby Limit)
+                const result = await Promise.race([
+                    agentExecutor.invoke({
+                        input: message,
+                        chat_history: history
+                    }),
+                    new Promise((_, reject) =>
+                        setTimeout(() => reject(new Error("Analysis timed out. Please try a simpler request.")), 9000)
+                    )
+                ]);
 
                 responseText = result.output;
                 strategy = "eda_agent";
