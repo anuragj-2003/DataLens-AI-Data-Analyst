@@ -219,7 +219,11 @@ router.post('/', optionalVerifyToken, async (req, res) => {
 
             } catch (err) {
                 console.error("EDA Agent Error", err);
-                responseText = `Failed to analyze data: ${err.message}`;
+                if (err.message && (err.message.includes("429") || err.message.includes("Rate limit"))) {
+                    responseText = "⚠️ **Daily Limit Reached**: The free AI tier has hit its daily limit (100k tokens). Please try again later or upgrade your plan.";
+                } else {
+                    responseText = `Failed to analyze data: ${err.message}`;
+                }
             }
 
         } else {
