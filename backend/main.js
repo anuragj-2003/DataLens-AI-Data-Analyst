@@ -107,4 +107,8 @@ process.on('unhandledRejection', (reason, promise) => {
     console.error('UNHANDLED REJECTION:', reason);
 });
 
-startServer();
+if (require.main === module) {
+    startServer();
+}
+
+module.exports = app;
