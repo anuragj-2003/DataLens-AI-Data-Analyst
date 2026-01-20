@@ -9,15 +9,6 @@
   </a>
 
   <h3 align="center">DataLens AI</h3>
-  <p align="center">
-    Your AI-Powered Data Analyst & Research Assistant
-    <br />
-    <a href="#demo">View Demo</a>
-    ·
-    <a href="https://github.com/github_username/repo_name/issues">Report Bug</a>
-    ·
-    <a href="https://github.com/github_username/repo_name/issues">Request Feature</a>
-  </p>
 </div>
 
 <!-- TABLE OF CONTENTS -->
